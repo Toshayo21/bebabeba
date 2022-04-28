@@ -24,11 +24,12 @@ void ifdone(vector<vector<Tile>> r, vector<vector<Tile>> k) { // перевір�
 		for (int j = 0; j < lenght; j++) {  
 			if (r[i][j] == FILLED) // перевірка на правильність заповнення 
 				n++;	
-			else if (n != k[t]) {
+			else if (n == k[t]) 
+				t++; // рухаємося по t			}
+			else {
 				perror("Error: Incorrect meaning"); // вивід помилки і вихід з програми
 				exit(-1);
-			}
-			else t++; // рухаємося по t   
+			}   
 		}                           
 	cout << "Congratulations! All is correct" << endl; // повідомлення про правильне виконання
 }
