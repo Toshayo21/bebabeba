@@ -11,8 +11,8 @@ enum Tile
 };
 
 void emptytiles(vector<vector<Tile>> r) { // Заповнення двовимірного вектора порожніми клітинами
-	for (int i = 0; i < row, i++) // row - ширина вектора
-		for (int j = 0; j < col; j++) // col - висота вектора
+	for (int i = 0; i < lenght, i++) // // lenght - ширина і висота вектора
+		for (int j = 0; j < lenght; j++)
 			if (r[i][j] == UNKNOWN) // перевірка чи є елемент порожнім 
 				r[i][j] = EMPTY; // заповнення порожніми клітинами 
 } 
@@ -20,7 +20,7 @@ void emptytiles(vector<vector<Tile>> r) { // Заповнення двовимі
 void ifdone(vector<vector<Tile>> r, vector<vector<Tile>> k) { // перевірка на правильність опрацювання вектора
 	// k - вектор, який складається з векторів, що містять довжини заповнених клітинок
 	int n = 0, t = 0; // створюємо лічильники
-	for (int i = 0; i < lenght, i++) // lenght - ширина і висота вектора
+	for (int i = 0; i < lenght, i++) 
 		for (int j = 0; j < lenght; j++) {  
 			if (r[i][j] == FILLED) // перевірка на правильність заповнення 
 				n++;	
