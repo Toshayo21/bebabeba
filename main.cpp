@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#define lenght 25
 using namespace std;
 
 enum Tile
@@ -17,13 +18,18 @@ void emptytiles(vector<vector<Tile>> r) { // Заповнення двовимі
 } 
 
 void ifdone(vector<vector<Tile>> r, vector<vector<Tile>> k) { // перевірка на правильність опрацювання вектора
-	// k - двомірний вектор, який створений до початку роботи і який на 100% правильний
-	for (int i = 0; i < row, i++) // row - ширина вектора
-		for (int j = 0; j < col; j++) // col - висота вектора
-			if (r[i][j] != k[i][j]) { // перевірка на правильність заповнення 
-				perror("Error: Incorrect meaning"); // вивід помилки і вихід з програми в разі незбіжності з k
+	// k - вектор, який складається з векторів, що містять довжини заповнених клітинок
+	int n = 0, t = 0; // створюємо лічильники
+	for (int i = 0; i < lenght, i++) // lenght - ширина і висота вектора
+		for (int j = 0; j < lenght; j++) {  
+			if (r[i][j] == FILLED) // перевірка на правильність заповнення 
+				n++;	
+			else if (n != k[t]) {
+				perror("Error: Incorrect meaning"); // вивід помилки і вихід з програми
 				exit(-1);
 			}
+			else t++; // рухаємося по t   
+		}                           
 	cout << "Congratulations! All is correct" << endl; // повідомлення про правильне виконання
 }
 
