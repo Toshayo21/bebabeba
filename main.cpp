@@ -11,13 +11,13 @@ enum Tile
 	EMPTY
 };
 
-bool isRowComplete(vector<vector<Tile>> r, vector<int> hints, int row, int width)
+bool isColumnComplete(vector<vector<Tile>> r, vector<int> hints, int column, int height)
 {
 	bool empty = 1;
 	int currentLen = 0;
 	int t = -1;
-	for (int i = 0; i < width; i++)
-		if (r[row][i] == FILLED)
+	for (int i = 0; i < height; i++)
+		if (r[column][i] == FILLED)
 			if (empty)
 			{
 				empty = 0;
@@ -38,13 +38,13 @@ bool isRowComplete(vector<vector<Tile>> r, vector<int> hints, int row, int width
 	return true;
 }
 
-bool isColumnComplete(vector<vector<Tile>> r, vector<int> hints, int column, int height)
+bool isRowComplete(vector<vector<Tile>> r, vector<int> hints, int row, int width)
 {
 	bool empty = 1;
 	int currentLen = 0;
 	int t = -1;
-	for (int i = 0; i < height; i++)
-		if (r[i][column] == FILLED)
+	for (int i = 0; i < width; i++)
+		if (r[i][row] == FILLED)
 			if (empty)
 			{
 				empty = 0;
@@ -67,12 +67,12 @@ bool isColumnComplete(vector<vector<Tile>> r, vector<int> hints, int column, int
 
 bool isComplete(vector<vector<Tile>> r, vector<vector<int>> hintsH, vector<vector<int>> hintsV, int height, int width)
 {
-	for (int i = 0; i < height; i++)
-		if (!isRowComplete(r, hintsH[i], i, width))
+	for (int i = 0; i < width; i++)
+		if (!isColumnComplete(r, hintsH[i], i, height))
 			return false;
 
-	for (int i = 0; i < width; i++)
-		if (!isColumnComplete(r, hintsV[i], i, height))
+	for (int i = 0; i < height; i++)
+		if (!isRowComplete(r, hintsV[i], i, width))
 			return false;
 
 	return true;
@@ -89,8 +89,8 @@ void readFile(int& height, int& width, vector<vector<int>> &hintsH, vector<vecto
 	}
 	file >> height >> width;
 
-	vector<vector<int>> H(width, vector<int>());
-	vector<vector<int>> V(height, vector<int>());
+	vector<vector<int>> H(height, vector<int>());
+	vector<vector<int>> V(width, vector<int>());
 
 	getline(file, str);
 	for (int i = 0; i < height; i++)
