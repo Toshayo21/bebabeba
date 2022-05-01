@@ -78,7 +78,7 @@ bool isComplete(vector<vector<Tile>> r, vector<vector<int>> hintsH, vector<vecto
 	return true;
 }
 
-void readFile(int& height, int& width, vector<vector<int>> &hintsH, vector<vector<int>> &hintsV)
+void readFile(int& height, int& width, vector<vector<int>>& hintsH, vector<vector<int>>& hintsV)
 {
 	string str;
 	ifstream file("filenme.txt");
@@ -113,38 +113,172 @@ void readFile(int& height, int& width, vector<vector<int>> &hintsH, vector<vecto
 
 	hintsH = H;
 	hintsV = V;
-	
+
 	file.close();
 }
+
+bool increment(vector<int>& offsets, int maxvalue)
+{
+	bool b = 1;
+	int i = offsets.size() - 1;
+	while (b)
+	{
+		offsets[i]++;
+		b = 0;
+		if (offsets[i] > maxvalue)
+		{
+			i--;
+			b = 1;
+		}
+		if (i < 0)
+			return false;
+	}
+	for (int j = i + 1; j < offsets.size(); j++)
+		offsets[j] = offsets[i];
+
+	return true;
+}
+
+void enumerateRow(vector<vector<Tile>>& r, vector<int> hints, int rowNumber)
+{
+	int w = r[0].size();
+
+	int numberOfBlocks = hints.size();
+	vector<bool> currentConfiguration(w);
+	vector<int> offsets(numberOfBlocks);
+	vector<int> maxOffsets(numberOfBlocks);
+	vector<int> startpos(numberOfBlocks);
+
+	int margin = w + 1;
+	for (int i = 0; i < numberOfBlocks; i++)
+		margin -= hints[i] + 1;
+
+	startpos[0] = 0;
+	for (int i = 1; i < numberOfBlocks; i++)
+		startpos[i] = startpos[i - 1] + hints[i - 1] + 1;
+
+	bool t = 1;
+	int validConfigurations = 0;
+	vector<int> occuredPerTile(w);
+	while (t)
+	{
+		for (int i = 0; i < w; i++)
+			currentConfiguration[i] = 0;
+		for (int i = 0; i < numberOfBlocks; i++)
+			for (int j = 0; j < hints[i]; j++)
+				currentConfiguration[startpos[i] + offsets[i] + j] = 1;
+
+		bool valid = 1;
+		for (int i = 0; i < w; i++)
+			if ((currentConfiguration[i] && (r[rowNumber][i] == EMPTY))
+				|| (!currentConfiguration[i] && (r[rowNumber][i] == FILLED)))
+				valid = 0;
+
+		if (valid)
+		{
+			for (int i = 0; i < w; i++)
+				if (currentConfiguration[i])
+					occuredPerTile[i]++;
+			validConfigurations++;
+			//testoutput(currentConfiguration);
+		}
+
+		t = increment(offsets, margin);
+	}
+	for (int i = 0; i < w; i++)
+		if (occuredPerTile[i] == 0)
+			r[rowNumber][i] = EMPTY;
+		else if (occuredPerTile[i] == validConfigurations)
+			r[rowNumber][i] = FILLED;
+}
+
+void output(vector<vector<Tile>> r)
+{
+	int h = r.size(), w = r[0].size();
+	for (int i = 0; i < h; i++)
+	{
+		for (int j = 0; j < w; j++)
+		{
+			if (r[i][j] == FILLED)
+				cout << '0';
+			else
+				cout << '.';
+		}
+		cout << endl;
+	}
+}
+
+void enumerateColumn(vector<vector<Tile>>& r, vector<int> hints, int columnNumber)
+{
+	int h = r.size();
+
+	int numberOfBlocks = hints.size();
+	vector<bool> currentConfiguration(h);
+	vector<int> offsets(numberOfBlocks);
+	vector<int> maxOffsets(numberOfBlocks);
+	vector<int> startpos(numberOfBlocks);
+
+	int margin = h + 1;
+	for (int i = 0; i < numberOfBlocks; i++)
+		margin -= hints[i] + 1;
+
+	startpos[0] = 0;
+	for (int i = 1; i < numberOfBlocks; i++)
+		startpos[i] = startpos[i - 1] + hints[i - 1] + 1;
+
+	bool t = 1;
+	int validConfigurations = 0;
+	vector<int> occuredPerTile(h);
+	while (t)
+	{
+		for (int i = 0; i < h; i++)
+			currentConfiguration[i] = 0;
+		for (int i = 0; i < numberOfBlocks; i++)
+			for (int j = 0; j < hints[i]; j++)
+				currentConfiguration[startpos[i] + offsets[i] + j] = 1;
+
+		bool valid = 1;
+		for (int i = 0; i < h; i++)
+			if ((currentConfiguration[i] && (r[i][columnNumber] == EMPTY))
+				|| (!currentConfiguration[i] && (r[i][columnNumber] == FILLED)))
+				valid = 0;
+
+		if (valid)
+		{
+			for (int i = 0; i < h; i++)
+				if (currentConfiguration[i])
+					occuredPerTile[i]++;
+			validConfigurations++;
+			//testoutput(currentConfiguration);
+		}
+
+		t = increment(offsets, margin);
+	}
+	for (int i = 0; i < h; i++)
+		if (occuredPerTile[i] == 0)
+			r[i][columnNumber] = EMPTY;
+		else if (occuredPerTile[i] == validConfigurations)
+			r[i][columnNumber] = FILLED;
+}
+
 
 int main()
 {
 	int width, height;
-	vector<vector<int>> hintsV;
 	vector<vector<int>> hintsH;
-	readFile(width, height, hintsH, hintsV);
-	vector<vector<Tile>> r(width, vector<Tile>(height));
-	
-	r[0][2] = FILLED;
-	r[0][4] = FILLED;
+	vector<vector<int>> hintsV;
+	readFile(height, width, hintsH, hintsV);
+	vector<vector<Tile>> r(height, vector<Tile>(width));
 
-	r[1][3] = FILLED;
-	r[1][4] = FILLED;
+	for (int c = 0; c < 15; c++)
+	{
+		for (int i = 0; i < height; i++)
+			enumerateRow(r, hintsH[i], i);
+		for (int i = 0; i < width; i++)
+			enumerateColumn(r, hintsV[i], i);
+	}
 
-	r[2][3] = FILLED;
-	r[2][4] = FILLED;
-
-	r[3][0] = FILLED;
-	r[3][1] = FILLED;
-	r[3][3] = FILLED;
-	r[3][4] = FILLED;
-
-	r[4][0] = FILLED;
-	r[4][1] = FILLED;
-	r[4][2] = FILLED;
-
-
-	cout << isComplete(r, hintsH, hintsV, height, width);
+	output(r);
 
 	return 0;
 }
