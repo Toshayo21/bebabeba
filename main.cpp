@@ -129,7 +129,7 @@ bool Nonogramm::Increment(vector<int>& offsets, int maxvalue)
 		if (i < 0)
 			return false;
 	}
-	for (int j = i + 1; j < offsets.size(); j++)
+	for (long unsigned int j = i + 1; j < offsets.size(); j++)
 		offsets[j] = offsets[i];
 
 	return true;
