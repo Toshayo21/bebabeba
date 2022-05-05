@@ -50,28 +50,6 @@ void ReadFile(int& height, int& width, vector<vector<int>>& hintsH, vector<vecto
 	file.close();
 }
 
-bool Increment(vector<int>& offsets, int maxvalue)
-{
-	bool b = 1;
-	int i = (int)offsets.size() - 1;
-	while (b)
-	{
-		offsets[i]++;
-		b = 0;
-		if (offsets[i] > maxvalue)
-		{
-			i--;
-			b = 1;
-		}
-		if (i < 0)
-			return false;
-	}
-	for (int j = i + 1; j < offsets.size(); j++)
-		offsets[j] = offsets[i];
-
-	return true;
-}
-
 void Output(vector<vector<Tile>> r, bool showBorders = 1, bool showEmpty = 0)
 {
 	int h = (int)r.size(), w = (int)r[0].size();
@@ -102,9 +80,65 @@ void Output(vector<vector<Tile>> r, bool showBorders = 1, bool showEmpty = 0)
 	cout << endl;
 }
 
-int EnumerateColumn(vector<vector<Tile>>& r, vector<int> hints, int columnNumber)
+class Nonogramm
+{
+public:
+	Nonogramm(int w, int h, vector<vector<int>> hintsH, vector<vector<int>> hintsV);
+	~Nonogramm();
+	void Enumerate();
+	vector<vector<Tile>> getResult();
+
+private:
+	int height, width;
+	vector<vector<Tile>> r;
+	vector<vector<int>> hintsH;
+	vector<vector<int>> hintsV;
+
+	bool Increment(vector<int>& offsets, int maxvalue);
+	int EnumerateRow(int rowNumber);
+	int EnumerateColumn(int rowNumber);
+};
+
+Nonogramm::Nonogramm(int w, int h, vector<vector<int>> hH, vector<vector<int>> hV)
+{
+	height = h;
+	width = w;
+	hintsH = hH;
+	hintsV = hV;
+	vector<vector<Tile>> t(h, vector<Tile>(w));
+	r = t;
+}
+
+Nonogramm::~Nonogramm()
+{
+}
+
+bool Nonogramm::Increment(vector<int>& offsets, int maxvalue)
+{
+	bool b = 1;
+	int i = (int)offsets.size() - 1;
+	while (b)
+	{
+		offsets[i]++;
+		b = 0;
+		if (offsets[i] > maxvalue)
+		{
+			i--;
+			b = 1;
+		}
+		if (i < 0)
+			return false;
+	}
+	for (int j = i + 1; j < offsets.size(); j++)
+		offsets[j] = offsets[i];
+
+	return true;
+}
+
+int Nonogramm::EnumerateColumn(int columnNumber)
 {
 	int h = (int)r.size();
+	vector<int> hints = hintsV[columnNumber];
 
 	int numberOfBlocks = (int)hints.size();
 	vector<bool> currentConfiguration(h);
@@ -125,29 +159,31 @@ int EnumerateColumn(vector<vector<Tile>>& r, vector<int> hints, int columnNumber
 	vector<int> occuredPerTile(h);
 	while (t)
 	{
+		//Creates current configuration
 		for (int i = 0; i < h; i++)
 			currentConfiguration[i] = 0;
 		for (int i = 0; i < numberOfBlocks; i++)
 			for (int j = 0; j < hints[i]; j++)
 				currentConfiguration[startPos[i] + offsets[i] + j] = 1;
 
+		//Checks if the configuration is valid
 		bool valid = 1;
 		for (int i = 0; i < h; i++)
 			if ((currentConfiguration[i] && (r[i][columnNumber] == EMPTY))
 				|| (!currentConfiguration[i] && (r[i][columnNumber] == FILLED)))
 				valid = 0;
-
+		//If the configuration is valid, it is taken into account
 		if (valid)
 		{
 			for (int i = 0; i < h; i++)
 				if (currentConfiguration[i])
 					occuredPerTile[i]++;
 			validConfigurations++;
-			//testoutput(currentConfiguration);
 		}
 
 		t = Increment(offsets, margin);
 	}
+	//Changes the main array according to the results of the enumeration
 	int dif = 0;
 	for (int i = 0; i < h; i++)
 		if (r[i][columnNumber] == UNKNOWN)
@@ -166,9 +202,11 @@ int EnumerateColumn(vector<vector<Tile>>& r, vector<int> hints, int columnNumber
 	return dif;
 }
 
-int EnumerateRow(vector<vector<Tile>>& r, vector<int> hints, int rowNumber)
+int Nonogramm::EnumerateRow(int rowNumber)
 {
 	int w = (int)r[0].size();
+	vector<int> hints = hintsH[rowNumber];
+
 
 	int numberOfBlocks = (int)hints.size();
 	vector<bool> currentConfiguration(w);
@@ -189,29 +227,32 @@ int EnumerateRow(vector<vector<Tile>>& r, vector<int> hints, int rowNumber)
 	vector<int> occuredPerTile(w);
 	while (t)
 	{
+		//Creates current configuration
 		for (int i = 0; i < w; i++)
 			currentConfiguration[i] = 0;
 		for (int i = 0; i < numberOfBlocks; i++)
 			for (int j = 0; j < hints[i]; j++)
 				currentConfiguration[startPos[i] + offsets[i] + j] = 1;
 
+		//Checks if the configuration is valid
 		bool valid = 1;
 		for (int i = 0; i < w; i++)
 			if ((currentConfiguration[i] && (r[rowNumber][i] == EMPTY))
 				|| (!currentConfiguration[i] && (r[rowNumber][i] == FILLED)))
 				valid = 0;
 
+		//If the configuration is valid, it is taken into account
 		if (valid)
 		{
 			for (int i = 0; i < w; i++)
 				if (currentConfiguration[i])
 					occuredPerTile[i]++;
 			validConfigurations++;
-			//testoutput(currentConfiguration);
 		}
 
 		t = Increment(offsets, margin);
 	}
+	//Changes the main array according to the results of the enumeration
 	int dif = 0;
 	for (int i = 0; i < w; i++)
 		if (r[rowNumber][i] == UNKNOWN)
@@ -231,7 +272,7 @@ int EnumerateRow(vector<vector<Tile>>& r, vector<int> hints, int rowNumber)
 	return dif;
 }
 
-void enumeration(vector<vector<Tile>> &r, vector<vector<int>> hintsH, vector<vector<int>> hintsV)
+void Nonogramm::Enumerate()
 {
 	int width = (int)r[0].size();
 	int height = (int)r.size();
@@ -239,10 +280,15 @@ void enumeration(vector<vector<Tile>> &r, vector<vector<int>> hintsH, vector<vec
 	while (remaining > 0)
 	{
 		for (int i = 0; i < height; i++)
-			remaining -= EnumerateRow(r, hintsH[i], i);
+			remaining -= EnumerateRow(i);
 		for (int i = 0; i < width; i++)
-			remaining -= EnumerateColumn(r, hintsV[i], i);
+			remaining -= EnumerateColumn(i);
 	}
+}
+
+vector<vector<Tile>> Nonogramm::getResult()
+{
+	return r;
 }
 
 int main()
@@ -253,8 +299,10 @@ int main()
 	ReadFile(height, width, hintsH, hintsV);
 	vector<vector<Tile>> r(height, vector<Tile>(width));
 
+	Nonogramm n(height, width, hintsH, hintsV);
+
 	cout << endl;
-	enumeration(r, hintsH, hintsV);
-	Output(r, 0, 0);
+	n.Enumerate();
+	Output(n.getResult(), 0, 0);
 	return 0;
 }
